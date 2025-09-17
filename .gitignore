@@ -1,7 +1,4 @@
 # Ignore real config and history when committing
-config.toml
-config/*.toml
 sessions/
 log/
-history.jsonl
-internal_storage.json
+

@@ -1,0 +1,30 @@
+model = "gpt-5-codex"
+model_reasoning_effort = "high"
+sandbox = "danger-full-access"
+
+[mcp_servers.memory]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-memory"]
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@latest"]
+env = { DEFAULT_MINIMUM_TOKENS = "10000" }
+
+[mcp_servers."file-context-server"]
+command = "npx"
+args = ["--yes", "file-context-server", "C:/path/to/project"]
+env = { CACHE_TTL = "3600000", MAX_CACHE_SIZE = "1000", MAX_FILE_SIZE = "1048576" }
+
+[mcp_servers."brave-search"]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-brave-search"]
+env = { BRAVE_API_KEY = "BSAPiV5Yyv1xw1KADN60u33hX14ObWf" }
+
+[mcp_servers.filesystem]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "${workspaceFolder}"]
