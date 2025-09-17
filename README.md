@@ -17,10 +17,3 @@ This repo captures a portable configuration for OpenAI Codex CLI. It includes:
 > Do not commit real API keys (e.g. Brave Search) � keep placeholders.
 
 
-
-Đồng bộ hóa nội dung của file `C:\Users\VIET TIEN\codex-setup\AGENTS.md` sang tiếng Anh với các yêu cầu sau:
-1. Giữ nguyên chính xác ý nghĩa gốc của nội dung
-2. Chỉ thực hiện chuyển ngữ từ ngôn ngữ hiện tại sang tiếng Anh
-3. Sử dụng từ ngữ chuyên ngành công nghệ lập trình chuẩn xác
-4. Đảm bảo tính nhất quán về thuật ngữ trong toàn bộ tài liệu
-5. Bảo toàn cấu trúc và định dạng gốc của file
