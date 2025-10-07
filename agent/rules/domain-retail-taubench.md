@@ -1,8 +1,4 @@
 ---
-trigger: manual
----
-
----
 alwaysApply: false
 type: capability_prompt
 scope: project

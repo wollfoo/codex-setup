@@ -2,11 +2,6 @@
 trigger: always_on
 ---
 
----
-description: 
-globs: 
-alwaysApply: true
----
 # Memory Tool Usage Guide
 
 ## ⚠️ CRITICAL: MEMORY TOOLS ARE MANDATORY ⚠️

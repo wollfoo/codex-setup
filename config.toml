@@ -15,10 +15,6 @@ command = "npx"
 args = ["-y", "@upstash/context7-mcp@latest"]
 env = { DEFAULT_MINIMUM_TOKENS = "10000" }
 
-[mcp_servers."file-context-server"]
-command = "npx"
-args = ["--yes", "file-context-server", "C:/path/to/project"]
-env = { CACHE_TTL = "3600000", MAX_CACHE_SIZE = "1000", MAX_FILE_SIZE = "1048576" }
 
 [mcp_servers."brave-search"]
 command = "npx"
