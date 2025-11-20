@@ -1,0 +1,40 @@
+model = "gpt-5-codex"
+model_reasoning_effort = "high"
+sandbox = "danger-full-access"
+
+# MCP servers configuration for Codex CLI
+# NOTE: Codex uses the [mcp_servers.*] table syntax (underscore), not camelCase.
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+disabled = false
+# You should provide CONTEXT7_API_KEY via your shell environment or a separate secrets mechanism.
+
+[mcp_servers.memory]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-memory"]
+disabled = false
+env = { MEMORY_FILE_PATH = ".windsurf/memory/knowledge.json" }
+
+[mcp_servers."sequential-thinking"]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+disabled = false
+
+[mcp_servers.repomix]
+command = "npx"
+args = ["-y", "repomix", "--mcp"]
+disabled = false
+
+[mcp_servers."mcp-playwright"]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest"]
+disabled = false
+
+[mcp_servers."chrome-devtools"]
+command = "npx"
+args = ["chrome-devtools-mcp@latest"]
+disabled = false
+
+

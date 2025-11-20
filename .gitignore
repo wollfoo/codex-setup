@@ -1,0 +1,5 @@
+# Ignore real config and history when committing
+sessions/
+log/
+.windsurf/
+
