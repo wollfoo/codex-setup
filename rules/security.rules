@@ -1,0 +1,366 @@
+# =============================================================================
+# SECURITY RULES
+# Mục đích: Bảo vệ khỏi các thao tác nguy hiểm
+# Nguồn: smart-execution.md - Tier 2 Gate-Check
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# SENSITIVE FILES
+# -----------------------------------------------------------------------------
+
+# Prompt for viewing env files
+prefix_rule(
+    pattern = ["cat", ".env"],
+    decision = "prompt",
+    justification = "Environment files chứa secrets - cần cẩn thận"
+)
+
+prefix_rule(
+    pattern = ["cat", ".env.local"],
+    decision = "prompt",
+    justification = "Environment files chứa secrets - cần cẩn thận"
+)
+
+prefix_rule(
+    pattern = ["cat", ".env.production"],
+    decision = "prompt",
+    justification = "Production environment files chứa secrets - cần cẩn thận"
+)
+
+# Allow viewing .env.example
+prefix_rule(
+    pattern = ["cat", ".env.example"],
+    decision = "allow",
+    justification = "Example env files are safe to view"
+)
+
+# -----------------------------------------------------------------------------
+# NETWORK OPERATIONS
+# Nguồn: smart-execution.md - External API with cost
+# -----------------------------------------------------------------------------
+
+# Allow localhost requests
+prefix_rule(
+    pattern = ["curl", "http://localhost"],
+    decision = "allow",
+    justification = "Localhost requests are safe for development"
+)
+
+prefix_rule(
+    pattern = ["curl", "http://127.0.0.1"],
+    decision = "allow",
+    justification = "Localhost requests are safe for development"
+)
+
+prefix_rule(
+    pattern = ["curl", "https://localhost"],
+    decision = "allow",
+    justification = "Localhost requests are safe for development"
+)
+
+# Prompt for external curl/wget requests
+prefix_rule(
+    pattern = ["curl"],
+    decision = "prompt",
+    justification = "External network requests cần review - có thể có cost hoặc rate limits"
+)
+
+prefix_rule(
+    pattern = ["wget"],
+    decision = "prompt",
+    justification = "Downloading files cần review"
+)
+
+# -----------------------------------------------------------------------------
+# SYSTEM OPERATIONS
+# -----------------------------------------------------------------------------
+
+# FORBIDDEN: sudo commands
+prefix_rule(
+    pattern = ["sudo"],
+    decision = "forbidden",
+    justification = "Elevated permissions không được phép trong sandbox. Chạy với quyền user thường."
+)
+
+# FORBIDDEN: su commands
+prefix_rule(
+    pattern = ["su"],
+    decision = "forbidden",
+    justification = "Switching user không được phép trong sandbox"
+)
+
+# FORBIDDEN: chmod 777 (insecure permissions)
+prefix_rule(
+    pattern = ["chmod", "777"],
+    decision = "forbidden",
+    justification = "chmod 777 là insecure. Sử dụng permissions cụ thể hơn như 755 hoặc 644."
+)
+
+# Prompt for other chmod
+prefix_rule(
+    pattern = ["chmod"],
+    decision = "prompt",
+    justification = "Changing permissions cần xác nhận"
+)
+
+# Prompt for chown
+prefix_rule(
+    pattern = ["chown"],
+    decision = "prompt",
+    justification = "Changing ownership cần xác nhận"
+)
+
+# Prompt for process operations
+prefix_rule(
+    pattern = ["kill"],
+    decision = "prompt",
+    justification = "Killing processes cần xác nhận"
+)
+
+prefix_rule(
+    pattern = ["pkill"],
+    decision = "prompt",
+    justification = "Killing processes by name cần xác nhận"
+)
+
+prefix_rule(
+    pattern = ["killall"],
+    decision = "prompt",
+    justification = "Killing all processes cần xác nhận"
+)
+
+# Allow process listing
+prefix_rule(
+    pattern = ["ps"],
+    decision = "allow",
+    justification = "Process listing is safe"
+)
+
+prefix_rule(
+    pattern = ["top"],
+    decision = "allow",
+    justification = "Process monitoring is safe"
+)
+
+prefix_rule(
+    pattern = ["htop"],
+    decision = "allow",
+    justification = "Process monitoring is safe"
+)
+
+# -----------------------------------------------------------------------------
+# DOCKER OPERATIONS
+# Nguồn: DevOps operations
+# -----------------------------------------------------------------------------
+
+# Allow docker info/inspect commands
+prefix_rule(
+    pattern = ["docker", ["ps", "images", "logs", "inspect", "stats", "info", "version"]],
+    decision = "allow",
+    justification = "Docker read operations are safe"
+)
+
+prefix_rule(
+    pattern = ["docker", "compose", ["ps", "logs", "config"]],
+    decision = "allow",
+    justification = "Docker compose read operations are safe"
+)
+
+# Prompt for docker commands
+prefix_rule(
+    pattern = ["docker", "run"],
+    decision = "prompt",
+    justification = "Docker run có thể ảnh hưởng system resources - cần review"
+)
+
+prefix_rule(
+    pattern = ["docker", "build"],
+    decision = "prompt",
+    justification = "Docker build có thể ảnh hưởng disk space - cần review"
+)
+
+prefix_rule(
+    pattern = ["docker", "push"],
+    decision = "prompt",
+    justification = "Pushing images to registry - cần review"
+)
+
+prefix_rule(
+    pattern = ["docker", "pull"],
+    decision = "prompt",
+    justification = "Pulling images có thể tốn bandwidth - cần review"
+)
+
+prefix_rule(
+    pattern = ["docker", "compose", "up"],
+    decision = "prompt",
+    justification = "Starting compose services - cần review"
+)
+
+prefix_rule(
+    pattern = ["docker", "compose", "down"],
+    decision = "prompt",
+    justification = "Stopping compose services - cần review"
+)
+
+# FORBIDDEN: docker --privileged
+prefix_rule(
+    pattern = ["docker", "run", "--privileged"],
+    decision = "forbidden",
+    justification = "Privileged containers có security risks nghiêm trọng. Không sử dụng trong development."
+)
+
+# FORBIDDEN: docker prune all
+prefix_rule(
+    pattern = ["docker", "system", "prune", "-a"],
+    decision = "forbidden",
+    justification = "Pruning all Docker data có thể xóa images/containers quan trọng. Sử dụng prune không có -a."
+)
+
+# -----------------------------------------------------------------------------
+# KUBERNETES
+# -----------------------------------------------------------------------------
+
+# Allow kubectl read operations
+prefix_rule(
+    pattern = ["kubectl", ["get", "describe", "logs", "top"]],
+    decision = "allow",
+    justification = "Kubernetes read operations are safe"
+)
+
+# Prompt for kubectl write operations
+prefix_rule(
+    pattern = ["kubectl", ["apply", "create", "delete", "patch", "scale"]],
+    decision = "prompt",
+    justification = "Kubernetes write operations có thể ảnh hưởng cluster - cần review"
+)
+
+# FORBIDDEN: kubectl delete namespace kube-system
+prefix_rule(
+    pattern = ["kubectl", "delete", "namespace", "kube-system"],
+    decision = "forbidden",
+    justification = "Deleting kube-system namespace sẽ phá hỏng cluster"
+)
+
+# -----------------------------------------------------------------------------
+# CLOUD CLI
+# -----------------------------------------------------------------------------
+
+# Prompt for AWS CLI
+prefix_rule(
+    pattern = ["aws"],
+    decision = "prompt",
+    justification = "AWS operations có thể tốn cost - cần review"
+)
+
+# Prompt for GCloud CLI
+prefix_rule(
+    pattern = ["gcloud"],
+    decision = "prompt",
+    justification = "GCloud operations có thể tốn cost - cần review"
+)
+
+# Prompt for Azure CLI
+prefix_rule(
+    pattern = ["az"],
+    decision = "prompt",
+    justification = "Azure operations có thể tốn cost - cần review"
+)
+
+# -----------------------------------------------------------------------------
+# SECRETS & CREDENTIALS
+# Nguồn: smart-execution.md - Auth/Security changes
+# -----------------------------------------------------------------------------
+
+# FORBIDDEN: Revoking tokens/keys
+prefix_rule(
+    pattern = ["gh", "auth", "logout"],
+    decision = "forbidden",
+    justification = "Logging out từ GitHub CLI có thể gây workflow disruption. Sử dụng gh auth status để kiểm tra."
+)
+
+prefix_rule(
+    pattern = ["aws", "configure"],
+    decision = "prompt",
+    justification = "Configuring AWS credentials - cần review"
+)
+
+prefix_rule(
+    pattern = ["gcloud", "auth"],
+    decision = "prompt",
+    justification = "GCloud auth operations - cần review"
+)
+
+prefix_rule(
+    pattern = ["az", "login"],
+    decision = "prompt",
+    justification = "Azure login - cần review"
+)
+
+# FORBIDDEN: Exporting secrets to stdout
+prefix_rule(
+    pattern = ["printenv"],
+    decision = "prompt",
+    justification = "Printing environment có thể expose secrets trong logs"
+)
+
+prefix_rule(
+    pattern = ["env"],
+    decision = "prompt",
+    justification = "Listing environment có thể expose secrets trong logs"
+)
+
+# -----------------------------------------------------------------------------
+# DANGEROUS PATTERNS
+# -----------------------------------------------------------------------------
+
+# FORBIDDEN: Writing to /etc
+prefix_rule(
+    pattern = ["cp", "/etc"],
+    decision = "forbidden",
+    justification = "Writing to /etc system directory is dangerous"
+)
+
+prefix_rule(
+    pattern = ["mv", "/etc"],
+    decision = "forbidden", 
+    justification = "Moving files in /etc system directory is dangerous"
+)
+
+# FORBIDDEN: Disk operations
+prefix_rule(
+    pattern = ["dd"],
+    decision = "forbidden",
+    justification = "dd có thể overwrite disk data - không cho phép trong sandbox"
+)
+
+prefix_rule(
+    pattern = ["mkfs"],
+    decision = "forbidden",
+    justification = "Formatting disks is dangerous"
+)
+
+prefix_rule(
+    pattern = ["fdisk"],
+    decision = "forbidden",
+    justification = "Disk partitioning is dangerous"
+)
+
+# FORBIDDEN: System shutdown/reboot
+prefix_rule(
+    pattern = ["shutdown"],
+    decision = "forbidden",
+    justification = "System shutdown không cho phép"
+)
+
+prefix_rule(
+    pattern = ["reboot"],
+    decision = "forbidden",
+    justification = "System reboot không cho phép"
+)
+
+prefix_rule(
+    pattern = ["init"],
+    decision = "forbidden",
+    justification = "Init commands không cho phép"
+)

@@ -1,0 +1,283 @@
+# =============================================================================
+# DEFAULT CODEX RULES
+# Mục đích: Kiểm soát các lệnh shell cơ bản ngoài sandbox
+# Pattern: Tự động cho readonly, xác nhận cho destructive ops
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# GIT - Version Control
+# Nguồn: smart-execution.md Tier 1 & Tier 2
+# -----------------------------------------------------------------------------
+
+# Tier 1: Auto-allow (safe read operations)
+prefix_rule(
+    pattern = ["git", ["status", "log", "diff", "show", "branch", "remote", "fetch"]],
+    decision = "allow",
+    justification = "Safe git read operations - không thay đổi state",
+    match = ["git status", "git log -n 5", "git diff HEAD", "git branch -a"],
+    not_match = ["git push", "git commit"]
+)
+
+# Tier 1: Auto-allow staging
+prefix_rule(
+    pattern = ["git", "add"],
+    decision = "allow",
+    justification = "Staging files is reversible with git reset",
+    match = ["git add .", "git add -A", "git add file.py"]
+)
+
+# Tier 1: Auto-allow stash
+prefix_rule(
+    pattern = ["git", "stash"],
+    decision = "allow",
+    justification = "Stashing is reversible with git stash pop"
+)
+
+# Tier 1: Auto-allow checkout/switch
+prefix_rule(
+    pattern = ["git", ["checkout", "switch"]],
+    decision = "allow",
+    justification = "Switching branches is safe operation"
+)
+
+# Tier 2: Prompt for commits (modifies history)
+prefix_rule(
+    pattern = ["git", "commit"],
+    decision = "prompt",
+    justification = "Commits modify repository history - cần xác nhận",
+    match = ["git commit -m 'test'", "git commit --amend"]
+)
+
+# Tier 2: Prompt for push (remote changes)
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "Pushing affects remote repository - cần xác nhận",
+    match = ["git push", "git push origin main"]
+)
+
+# FORBIDDEN: Force push (destructive)
+prefix_rule(
+    pattern = ["git", "push", "--force"],
+    decision = "forbidden",
+    justification = "Force push co the gay mat code. Su dung --force-with-lease thay the.",
+    match = ["git push --force", "git push --force origin main"]
+)
+
+prefix_rule(
+    pattern = ["git", "push", "-f"],
+    decision = "forbidden",
+    justification = "Force push có thể gây mất code. Sử dụng --force-with-lease thay thế."
+)
+
+# Tier 2: Prompt for reset (can lose uncommitted changes)
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "prompt",
+    justification = "Hard reset có thể mất uncommitted changes - cần xác nhận"
+)
+
+# -----------------------------------------------------------------------------
+# FILE SYSTEM - Read/Write Operations
+# Nguồn: smart-execution.md Tier 1 & Tier 2
+# -----------------------------------------------------------------------------
+
+# Tier 1: Auto-allow read operations
+prefix_rule(
+    pattern = ["ls"],
+    decision = "allow",
+    justification = "Directory listing is safe"
+)
+
+prefix_rule(
+    pattern = ["cat"],
+    decision = "allow",
+    justification = "Reading file contents is safe"
+)
+
+prefix_rule(
+    pattern = ["head"],
+    decision = "allow",
+    justification = "Reading file head is safe"
+)
+
+prefix_rule(
+    pattern = ["tail"],
+    decision = "allow",
+    justification = "Reading file tail is safe"
+)
+
+prefix_rule(
+    pattern = ["less"],
+    decision = "allow",
+    justification = "Paging file contents is safe"
+)
+
+prefix_rule(
+    pattern = ["grep"],
+    decision = "allow",
+    justification = "Searching in files is safe"
+)
+
+prefix_rule(
+    pattern = ["find"],
+    decision = "allow",
+    justification = "Finding files is safe"
+)
+
+prefix_rule(
+    pattern = ["tree"],
+    decision = "allow",
+    justification = "Directory tree is safe"
+)
+
+prefix_rule(
+    pattern = ["wc"],
+    decision = "allow",
+    justification = "Word count is safe"
+)
+
+prefix_rule(
+    pattern = ["file"],
+    decision = "allow",
+    justification = "File type detection is safe"
+)
+
+# Tier 1: Auto-allow directory creation
+prefix_rule(
+    pattern = ["mkdir"],
+    decision = "allow",
+    justification = "Creating directories is generally safe"
+)
+
+# Tier 1: Auto-allow touch (create empty files)
+prefix_rule(
+    pattern = ["touch"],
+    decision = "allow",
+    justification = "Creating empty files is safe"
+)
+
+# Tier 2: Prompt for deletions
+prefix_rule(
+    pattern = ["rm"],
+    decision = "prompt",
+    justification = "File deletion là irreversible - cần xác nhận",
+    match = ["rm file.txt", "rm -r folder/"],
+    not_match = ["ls", "cat file.txt"]
+)
+
+# FORBIDDEN: Root deletions
+prefix_rule(
+    pattern = ["rm", "-rf", "/"],
+    decision = "forbidden",
+    justification = "Root deletion bị cấm hoàn toàn - không có ngoại lệ"
+)
+
+prefix_rule(
+    pattern = ["rm", "-rf", "/*"],
+    decision = "forbidden",
+    justification = "Root deletion bị cấm hoàn toàn"
+)
+
+# Tier 2: Prompt for move/rename
+prefix_rule(
+    pattern = ["mv"],
+    decision = "prompt",
+    justification = "Move có thể overwrite files - cần xác nhận"
+)
+
+prefix_rule(
+    pattern = ["cp"],
+    decision = "prompt",
+    justification = "Copy có thể overwrite files - cần xác nhận"
+)
+
+# -----------------------------------------------------------------------------
+# PACKAGE MANAGERS - NPM/Yarn/PNPM
+# Nguồn: smart-execution.md Tier 2
+# -----------------------------------------------------------------------------
+
+# Tier 1: Auto-allow listing/audit
+prefix_rule(
+    pattern = ["npm", ["list", "ls", "audit", "outdated", "view", "info", "search"]],
+    decision = "allow",
+    justification = "Package info commands are read-only"
+)
+
+# Tier 2: Prompt for install (modifies node_modules)
+prefix_rule(
+    pattern = ["npm", "install"],
+    decision = "prompt",
+    justification = "Installing dependencies modifies environment - cần review",
+    match = ["npm install", "npm install lodash"]
+)
+
+prefix_rule(
+    pattern = ["npm", "i"],
+    decision = "prompt",
+    justification = "Short form of npm install - cần review"
+)
+
+prefix_rule(
+    pattern = ["npm", "ci"],
+    decision = "prompt",
+    justification = "Clean install - cần review"
+)
+
+# Tier 2: Prompt for uninstall
+prefix_rule(
+    pattern = ["npm", "uninstall"],
+    decision = "prompt",
+    justification = "Removing packages may break dependencies"
+)
+
+# FORBIDDEN: npm publish (production impact)
+prefix_rule(
+    pattern = ["npm", "publish"],
+    decision = "forbidden",
+    justification = "Publishing packages phải là quy trình thủ công có review"
+)
+
+# Yarn equivalents
+prefix_rule(
+    pattern = ["yarn", ["list", "info", "why", "audit"]],
+    decision = "allow",
+    justification = "Yarn read operations are safe"
+)
+
+prefix_rule(
+    pattern = ["yarn", "add"],
+    decision = "prompt",
+    justification = "Installing dependencies với yarn - cần review"
+)
+
+prefix_rule(
+    pattern = ["yarn", "remove"],
+    decision = "prompt",
+    justification = "Removing packages với yarn - cần review"
+)
+
+prefix_rule(
+    pattern = ["yarn", "install"],
+    decision = "prompt",
+    justification = "Installing dependencies với yarn - cần review"
+)
+
+# PNPM equivalents  
+prefix_rule(
+    pattern = ["pnpm", ["list", "ls", "why", "audit"]],
+    decision = "allow",
+    justification = "PNPM read operations are safe"
+)
+
+prefix_rule(
+    pattern = ["pnpm", ["add", "install", "i"]],
+    decision = "prompt",
+    justification = "Installing dependencies với pnpm - cần review"
+)
+
+prefix_rule(
+    pattern = ["pnpm", "remove"],
+    decision = "prompt",
+    justification = "Removing packages với pnpm - cần review"
+)

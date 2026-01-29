@@ -1,0 +1,317 @@
+# =============================================================================
+# DEVELOPMENT WORKFLOW RULES
+# Mục đích: Hỗ trợ workflow phát triển từ primary-workflow.md
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# BUILD & TEST COMMANDS
+# Nguồn: primary-workflow.md - Testing section
+# -----------------------------------------------------------------------------
+
+# Auto-allow npm scripts
+prefix_rule(
+    pattern = ["npm", "run"],
+    decision = "allow",
+    justification = "NPM scripts thường safe cho development"
+)
+
+prefix_rule(
+    pattern = ["npm", "test"],
+    decision = "allow",
+    justification = "Running tests is safe - không có side effects"
+)
+
+prefix_rule(
+    pattern = ["npm", "start"],
+    decision = "allow",
+    justification = "Starting dev server is safe"
+)
+
+# Yarn scripts
+prefix_rule(
+    pattern = ["yarn", "run"],
+    decision = "allow",
+    justification = "Yarn scripts are safe for development"
+)
+
+prefix_rule(
+    pattern = ["yarn", "test"],
+    decision = "allow",
+    justification = "Running tests is safe"
+)
+
+prefix_rule(
+    pattern = ["yarn", "start"],
+    decision = "allow",
+    justification = "Starting dev server is safe"
+)
+
+prefix_rule(
+    pattern = ["yarn", "dev"],
+    decision = "allow",
+    justification = "Dev server is safe"
+)
+
+prefix_rule(
+    pattern = ["yarn", "build"],
+    decision = "allow",
+    justification = "Building project is safe"
+)
+
+# PNPM scripts
+prefix_rule(
+    pattern = ["pnpm", "run"],
+    decision = "allow",
+    justification = "PNPM scripts are safe"
+)
+
+prefix_rule(
+    pattern = ["pnpm", ["test", "start", "dev", "build"]],
+    decision = "allow",
+    justification = "Common PNPM commands are safe"
+)
+
+# -----------------------------------------------------------------------------
+# JAVASCRIPT/TYPESCRIPT EXECUTION
+# -----------------------------------------------------------------------------
+
+prefix_rule(
+    pattern = ["node"],
+    decision = "allow",
+    justification = "Node.js execution for development"
+)
+
+prefix_rule(
+    pattern = ["npx"],
+    decision = "allow",
+    justification = "NPX execution for development tools"
+)
+
+prefix_rule(
+    pattern = ["tsx"],
+    decision = "allow",
+    justification = "TypeScript execution is safe"
+)
+
+prefix_rule(
+    pattern = ["tsc"],
+    decision = "allow",
+    justification = "TypeScript compilation is safe"
+)
+
+prefix_rule(
+    pattern = ["bun"],
+    decision = "allow",
+    justification = "Bun runtime execution"
+)
+
+prefix_rule(
+    pattern = ["deno"],
+    decision = "allow",
+    justification = "Deno runtime execution"
+)
+
+# -----------------------------------------------------------------------------
+# PYTHON EXECUTION
+# -----------------------------------------------------------------------------
+
+prefix_rule(
+    pattern = ["python"],
+    decision = "allow",
+    justification = "Python execution for development"
+)
+
+prefix_rule(
+    pattern = ["python3"],
+    decision = "allow",
+    justification = "Python3 execution for development"
+)
+
+prefix_rule(
+    pattern = ["pip", ["list", "show", "freeze", "check"]],
+    decision = "allow",
+    justification = "Pip read operations are safe"
+)
+
+prefix_rule(
+    pattern = ["pip", "install"],
+    decision = "prompt",
+    justification = "Pip install modifies environment - cần review"
+)
+
+prefix_rule(
+    pattern = ["pip3", "install"],
+    decision = "prompt",
+    justification = "Pip3 install modifies environment - cần review"
+)
+
+prefix_rule(
+    pattern = ["poetry", ["show", "version", "check"]],
+    decision = "allow",
+    justification = "Poetry read operations are safe"
+)
+
+prefix_rule(
+    pattern = ["poetry", ["install", "add", "remove"]],
+    decision = "prompt",
+    justification = "Poetry package operations - cần review"
+)
+
+prefix_rule(
+    pattern = ["uv", ["pip", "venv"]],
+    decision = "allow",
+    justification = "UV package manager operations"
+)
+
+# -----------------------------------------------------------------------------
+# GOLANG
+# -----------------------------------------------------------------------------
+
+prefix_rule(
+    pattern = ["go", ["run", "build", "test", "fmt", "vet", "mod"]],
+    decision = "allow",
+    justification = "Go development commands are safe"
+)
+
+# -----------------------------------------------------------------------------
+# RUST
+# -----------------------------------------------------------------------------
+
+prefix_rule(
+    pattern = ["cargo", ["run", "build", "test", "check", "fmt", "clippy"]],
+    decision = "allow",
+    justification = "Cargo development commands are safe"
+)
+
+prefix_rule(
+    pattern = ["cargo", ["add", "remove"]],
+    decision = "prompt",
+    justification = "Cargo package operations - cần review"
+)
+
+# -----------------------------------------------------------------------------
+# GITHUB CLI (gh)
+# Nguồn: primary-workflow.md - GitHub operations
+# -----------------------------------------------------------------------------
+
+# Auto-allow gh read operations
+prefix_rule(
+    pattern = ["gh", "pr", ["list", "view", "status", "diff", "checks"]],
+    decision = "allow",
+    justification = "GitHub PR read operations are safe"
+)
+
+prefix_rule(
+    pattern = ["gh", "issue", ["list", "view", "status"]],
+    decision = "allow",
+    justification = "GitHub issue read operations are safe"
+)
+
+prefix_rule(
+    pattern = ["gh", "repo", ["list", "view", "clone"]],
+    decision = "allow",
+    justification = "GitHub repo read operations are safe"
+)
+
+prefix_rule(
+    pattern = ["gh", "auth", "status"],
+    decision = "allow",
+    justification = "Checking auth status is safe"
+)
+
+# Prompt for gh create/edit
+prefix_rule(
+    pattern = ["gh", "pr", "create"],
+    decision = "prompt",
+    justification = "Creating PRs requires review - cần xác nhận"
+)
+
+prefix_rule(
+    pattern = ["gh", "pr", "merge"],
+    decision = "prompt",
+    justification = "Merging PRs requires review - cần xác nhận"
+)
+
+prefix_rule(
+    pattern = ["gh", "issue", "create"],
+    decision = "prompt",
+    justification = "Creating issues requires review - cần xác nhận"
+)
+
+prefix_rule(
+    pattern = ["gh", "release", "create"],
+    decision = "prompt",
+    justification = "Creating releases requires review - cần xác nhận"
+)
+
+# -----------------------------------------------------------------------------
+# DATABASE OPERATIONS
+# Nguồn: smart-execution.md Tier 2 - DB migration/schema
+# -----------------------------------------------------------------------------
+
+# Prompt for psql (database access)
+prefix_rule(
+    pattern = ["psql"],
+    decision = "prompt",
+    justification = "Database access cần xác nhận - có thể ảnh hưởng production data"
+)
+
+# Prompt for mysql
+prefix_rule(
+    pattern = ["mysql"],
+    decision = "prompt",
+    justification = "Database access cần xác nhận"
+)
+
+# Prompt for database migrations
+prefix_rule(
+    pattern = ["npx", "prisma", ["generate", "format", "validate", "studio"]],
+    decision = "allow",
+    justification = "Prisma read/generate operations are safe"
+)
+
+prefix_rule(
+    pattern = ["npx", "prisma", ["migrate", "db"]],
+    decision = "prompt",
+    justification = "Database migrations có thể ảnh hưởng schema - cần review"
+)
+
+prefix_rule(
+    pattern = ["npx", "prisma", "migrate", "deploy"],
+    decision = "prompt",
+    justification = "Deploying migrations to production - cần review"
+)
+
+prefix_rule(
+    pattern = ["npx", "drizzle-kit", ["generate", "check"]],
+    decision = "allow",
+    justification = "Drizzle generate operations are safe"
+)
+
+prefix_rule(
+    pattern = ["npx", "drizzle-kit", ["push", "migrate"]],
+    decision = "prompt",
+    justification = "Drizzle migrations - cần review"
+)
+
+# -----------------------------------------------------------------------------
+# LINTING & FORMATTING
+# -----------------------------------------------------------------------------
+
+prefix_rule(
+    pattern = ["eslint"],
+    decision = "allow",
+    justification = "Linting is safe"
+)
+
+prefix_rule(
+    pattern = ["prettier"],
+    decision = "allow",
+    justification = "Formatting is safe"
+)
+
+prefix_rule(
+    pattern = ["biome"],
+    decision = "allow",
+    justification = "Biome linting/formatting is safe"
+)
